@@ -12,7 +12,7 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
   return (
     <Link 
       href={`/ramblings/${post.slug}`}
-      className="group block bg-white/5 backdrop-blur-sm rounded-lg overflow-hidden hover:bg-white/10 transition-all duration-300"
+      className="group block bg-black/30 backdrop-blur-sm rounded-lg overflow-hidden hover:bg-black/40 transition-all duration-300 border border-white/10"
     >
       {post.coverImage && (
         <div className="relative h-48 overflow-hidden">
@@ -37,7 +37,7 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
           {post.excerpt}
         </p>
         {post.tags && post.tags.length > 0 && (
-          <div className="flex gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-4">
             {post.tags.map(tag => (
               <span 
                 key={tag}

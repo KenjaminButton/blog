@@ -37,36 +37,43 @@ const samplePosts: BlogPost[] = [
 
 export default function RamblingsPage() {
   return (
-    <main className="min-h-screen pt-16 bg-gradient-to-b from-gray-900 to-black">
-      {/* Header Section */}
-      <div className="relative h-64 overflow-hidden">
+    <main className="min-h-screen pt-16 relative">
+      {/* Full-screen background image */}
+      <div className="fixed inset-0 z-0">
         <Image
-          src="/images/basketball-court.jpg"
+          src="/images/court2.avif"
           alt="Basketball Court"
           fill
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Basketball Ramblings
-            </h1>
-            <p className="text-lg text-white/80 max-w-2xl">
-              Thoughts, analysis, and stories about the game we love. From classic games to modern tactics,
-              join me as we explore basketball&apos;s past, present, and future.
-            </p>
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* Posts Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {samplePosts.map(post => (
-            <BlogPostCard key={post.id} post={post} />
-          ))}
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Header Section */}
+        <div className="relative py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                Basketball Ramblings
+              </h1>
+              <p className="text-lg text-white/80 max-w-2xl">
+                Thoughts, analysis, and stories about the game we love. From classic games to modern tactics,
+                join me as we explore basketball&apos;s past, present, and future.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Posts Grid */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {samplePosts.map(post => (
+              <BlogPostCard key={post.id} post={post} />
+            ))}
+          </div>
         </div>
       </div>
     </main>
