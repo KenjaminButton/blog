@@ -1,0 +1,413 @@
+Below is a rewritten Blog Application Specification tailored for **Next.js** with **TypeScript**. This version incorporates all prior requirements—authentication as a priority, public post viewing, restricted posting for logged-in users, and the stylish design with Tailwind CSS—while ensuring TypeScript’s type safety is integrated into the spec. I’ve updated the file structure, code examples, and implementation details to reflect TypeScript usage.
+
+---
+
+# Blog Application Specification (Next.js with TypeScript)
+
+## Overview
+This application is a personal blog where you, as an authenticated user, can post writings, pictures, and links to remember your day, while the public can view posts without logging in. Built with **Next.js 14** and **TypeScript**, it leverages type safety, server-side rendering (SSR), and static site generation (SSG). **Tailwind CSS** ensures a stylish, responsive design, and **NextAuth.js** provides secure authentication as a priority feature.
+
+The blog will:
+- Restrict posting, editing, and deletion to logged-in users via authentication.
+- Allow public access to view posts.
+- Feature a modern, elegant UI with a chronological feed, searchable by date or tags.
+
+---
+
+## Features
+
+### 1. Authentication (Priority Feature)
+- **Purpose**: Restrict content creation, editing, and deletion to logged-in users.
+- **Method**: NextAuth.js with Email/Password Credentials.
+- **Details**:
+  - Login page at `/login` with typed form inputs.
+  - JWT-based session management.
+  - Middleware to protect routes like `/new` and `/posts/edit/[slug]`.
+  - Logout option in the sidebar/menu.
+- **User Experience**:
+  - Public can view posts at `/posts` and `/posts/[slug]`.
+  - Non-logged-in users see “Log in to post” when accessing restricted routes.
+- **Security**:
+  - Passwords hashed with `bcrypt`.
+  - Type-safe session data.
+
+### 2. Core Functionality
+- **Post Creation (Logged-in Users Only)**:
+  - Form with markdown text, image uploads, URL embedding, tags, and timestamp.
+- **Post Editing (Logged-in Users Only)**:
+  - Edit posts with pre-filled fields.
+- **Post Deletion (Logged-in Users Only)**:
+  - Soft delete (trash) with permanent delete option.
+- **Post Display (Public Access)**:
+  - Chronological feed at `/posts`; single-post view at `/posts/[slug]`.
+- **Search/Filter (Public Access)**:
+  - Filter by date range or tags; optional keyword search.
+
+### 3. User Interface
+- **Homepage (`/posts`)**:
+  - Publicly viewable grid/list layout (toggleable) with infinite scroll or pagination.
+- **Single Post Page (`/posts/[slug]`)**:
+  - Publicly accessible full post view.
+- **Login Page (`/login`)**:
+  - Public form for authentication.
+- **Editor Page (`/new`)**:
+  - Protected, distraction-free interface for logged-in users.
+- **Sidebar (Desktop) / Hamburger Menu (Mobile)**:
+  - Links to homepage, new post (if logged in), archive, tag cloud, and logout (if logged in).
+
+### 4. Styling Goals
+- **Aesthetic**: Modern, minimalist, elegant.
+- **Color Scheme**: 
+  - Primary: `#E6E6FA` (lavender), `#FFD1DC` (blush pink).
+  - Accents: `#333333` (charcoal), `#D4AF37` (gold).
+  - Background: `#FAF9F6` (off-white).
+- **Typography**: 
+  - Headings: Playfair Display.
+  - Body: Inter.
+- **Animations**: Fade-ins, hover effects.
+- **Responsive**: Mobile-first with Tailwind.
+
+---
+
+## Technical Stack
+
+### Framework
+- **Next.js 14**:
+  - App Router with TypeScript.
+  - Server Components for efficiency.
+
+### Language
+- **TypeScript**:
+  - Type-safe components, API routes, and data models.
+
+### Authentication
+- **NextAuth.js**:
+  - TypeScript support for session and credential types.
+
+### Styling
+- **Tailwind CSS**:
+  - Configured with custom types for colors/fonts.
+
+### Data Storage
+- **Authentication**: Supabase `users` table (email, hashed password).
+- **Content**: MDX files initially; Supabase for dynamic posts later.
+- **Images**: Supabase Storage or Cloudinary.
+
+### Deployment
+- **Vercel**:
+  - TypeScript support and automatic scaling.
+
+---
+
+## File Structure
+```
+my-blog/
+├── /app
+│   ├── /api
+│   │   └── /auth/[...nextauth]
+│   │       └── route.ts       # NextAuth config
+│   ├── /components
+│   │   ├── PostCard.tsx       # Typed post preview
+│   │   ├── Editor.tsx         # Typed editor form
+│   │   ├── Sidebar.tsx        # Typed navigation
+│   │   └── TagCloud.tsx       # Typed tag display
+│   ├── /login
+│   │   └── page.tsx          # Login page
+│   ├── /posts
+│   │   ├── [slug]
+│   │   │   └── page.tsx      # Single post
+│   │   └── page.tsx          # Post feed
+│   ├── /new
+│   │   └── page.tsx          # Protected editor
+│   ├── /archive
+│   │   └── page.tsx          # Archive view
+│   ├── globals.css           # Tailwind imports
+│   ├── layout.tsx            # Root layout with SessionProvider
+│   └── page.tsx              # Redirect to /posts
+├── /content
+│   └── /posts                # MDX files
+├── /lib
+│   ├── db.ts                 # Typed Supabase client
+│   └── types.ts              # Shared types
+├── /middleware.ts            # Typed middleware
+├── /public                   # Static assets
+├── tailwind.config.ts        # Typed Tailwind config
+├── next.config.js
+├── tsconfig.json             # TypeScript config
+└── package.json
+```
+
+---
+
+## Implementation Details
+
+### 1. TypeScript Types
+- **Post Type** (`/lib/types.ts`):
+  ```typescript
+  export interface Post {
+    slug: string;
+    title?: string;
+    content: string;
+    images: string[];
+    links: { url: string; title?: string }[];
+    tags: string[];
+    createdAt: string;
+  }
+  ```
+- **User Session Type**:
+  ```typescript
+  import { DefaultSession } from "next-auth";
+
+  declare module "next-auth" {
+    interface Session {
+      user: {
+        id: string;
+        email: string;
+      } & DefaultSession["user"];
+    }
+  }
+  ```
+
+### 2. Authentication Setup
+- **NextAuth Config** (`/app/api/auth/[...nextauth]/route.ts`):
+  ```typescript
+  import NextAuth, { NextAuthOptions } from "next-auth";
+  import CredentialsProvider from "next-auth/providers/credentials";
+  import { compare } from "bcrypt";
+  import { db } from "@/lib/db";
+
+  export const authOptions: NextAuthOptions = {
+    providers: [
+      CredentialsProvider({
+        name: "Credentials",
+        credentials: {
+          email: { label: "Email", type: "email" },
+          password: { label: "Password", type: "password" },
+        },
+        async authorize(credentials) {
+          if (!credentials?.email || !credentials?.password) return null;
+          const user = await db.users.findFirst({ where: { email: credentials.email } });
+          if (!user || !(await compare(credentials.password, user.password))) {
+            throw new Error("Invalid credentials");
+          }
+          return { id: user.id, email: user.email };
+        },
+      }),
+    ],
+    pages: { signIn: "/login" },
+    session: { strategy: "jwt" },
+    secret: process.env.NEXTAUTH_SECRET,
+  };
+
+  const handler = NextAuth(authOptions);
+  export { handler as GET, handler as POST };
+  ```
+- **Middleware** (`/middleware.ts`):
+  ```typescript
+  import { withAuth } from "next-auth/middleware";
+
+  export default withAuth({
+    pages: { signIn: "/login" },
+  });
+
+  export const config = { matcher: ["/new", "/posts/edit/:path*"] };
+  ```
+
+### 3. Login Page
+- **`/app/login/page.tsx`**:
+  ```typescript
+  "use client";
+  import { signIn } from "next-auth/react";
+  import { useState } from "react";
+
+  const Login: React.FC = () => {
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [error, setError] = useState<string | null>(null);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      const result = await signIn("credentials", {
+        redirect: true,
+        email,
+        password,
+        callbackUrl: "/posts",
+      });
+      if (result?.error) setError(result.error);
+    };
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-offwhite">
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+          <h1 className="text-2xl font-playfair text-charcoal mb-6">Log In</h1>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="w-full p-3 mb-4 border border-lavender rounded-md focus:ring-2 focus:ring-blush"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="w-full p-3 mb-6 border border-lavender rounded-md focus:ring-2 focus:ring-blush"
+          />
+          <button
+            type="submit"
+            className="w-full bg-blush text-white py-3 rounded-full hover:scale-105 transition-transform"
+          >
+            Log In
+          </button>
+        </form>
+      </div>
+    );
+  };
+
+  export default Login;
+  ```
+
+### 4. Editor Page
+- **`/app/new/page.tsx`**:
+  ```typescript
+  import { useSession } from "next-auth/react";
+
+  const Editor: React.FC = () => {
+    const { data: session, status } = useSession();
+
+    if (status === "loading") return <p>Loading...</p>;
+    if (!session) return <p className="text-charcoal">You must be logged in to post.</p>;
+
+    return <div>{/* Type-safe editor form */}</div>;
+  };
+
+  export default Editor;
+  ```
+
+### 5. Post Feed
+- **`/app/posts/page.tsx`**:
+  ```typescript
+  import { Post } from "@/lib/types";
+  import PostCard from "@/components/PostCard";
+
+  interface PostsProps {
+    posts: Post[];
+  }
+
+  const Posts: React.FC<PostsProps> = ({ posts }) => {
+    return (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post) => (
+          <PostCard key={post.slug} post={post} />
+        ))}
+      </div>
+    );
+  };
+
+  export default Posts;
+  ```
+
+### 6. Routing
+- `/posts` → Public feed.
+- `/posts/[slug]` → Public single post.
+- `/new` → Protected editor (logged-in only).
+- `/login` → Public login page.
+
+---
+
+## Development Phases
+1. **Setup**:
+   - Initialize Next.js with TypeScript (`npx create-next-app@latest --ts`).
+   - Add Tailwind CSS and NextAuth.js.
+2. **Authentication (Priority)**:
+   - Implement typed NextAuth.js config and login page.
+   - Protect `/new` with middleware.
+3. **Static Blog**:
+   - Build public post feed with MDX and TypeScript.
+4. **Dynamic Features**:
+   - Add typed editor and file uploads (logged-in only).
+5. **Polish**:
+   - Add animations, search/filter, and responsive design.
+6. **Deploy**:
+   - Deploy to Vercel with typed environment variables.
+
+---
+
+## Dependencies
+```json
+{
+  "dependencies": {
+    "next": "14.x.x",
+    "react": "^18.x.x",
+    "next-auth": "^4.x.x",
+    "bcrypt": "^5.x.x",
+    "@supabase/supabase-js": "^2.x.x",
+    "typescript": "^5.x.x",
+    "@types/react": "^18.x.x",
+    "@types/node": "^20.x.x",
+    "tailwindcss": "^3.x.x"
+  }
+}
+```
+
+---
+
+This TypeScript-enhanced spec ensures type safety across components, routes, and data, while maintaining the core requirements: public post viewing, restricted posting for logged-in users, and a stylish design. Let me know if you’d like further adjustments!
+
+
+# Coding pattern preferences
+
+– Always prefer simple solutions  
+– Avoid duplication of code whenever possible, which means checking for other areas of the codebase that might already have similar code and functionality  
+– Write code that takes into account the different environments: dev, test, and prod  
+– You are careful to only make changes that are requested or you are confident are well understood and related to the change being requested  
+– When fixing an issue or bug, do not introduce a new pattern or technology without first exhausting all options for the existing implementation. And if you finally do this, make sure to remove the old implementation afterwards so we don’t have duplicate logic.  
+– Keep the codebase very clean and organized  
+– Avoid writing scripts in files if possible, especially if the script is likely only to be run once  
+– Avoid having files over 200–300 lines of code. Refactor at that point.  
+– Mocking data is only needed for tests, never mock data for dev or prod  
+– Never add stubbing or fake data patterns to code that affects the dev or prod environments  
+– Never overwrite my .env file without first asking and confirming
+
+
+# Technical Stack
+
+### Framework
+- **Next.js 14**:
+  - App Router with TypeScript.
+  - Server Components for efficiency.
+
+### Language
+- **TypeScript**:
+  - Type-safe components, API routes, and data models.
+
+### Authentication
+- **NextAuth.js**:
+  - TypeScript support for session and credential types.
+
+### Styling
+- **Tailwind CSS**:
+  - Configured with custom types for colors/fonts.
+
+### Data Storage
+- **Authentication**: Supabase `users` table (email, hashed password).
+- **Content**: MDX files initially; Supabase for dynamic posts later.
+- **Images**: Supabase Storage or Cloudinary.
+
+### Deployment
+- **Vercel**:
+  - TypeScript support and automatic scaling.
+
+---
+
+
+# Coding Workflow Preferences
+
+- Focus on the areas of code relevant to the task
+- Do not touch code that is unrelated to the task
+- Write thorough tests for all major functionality
+- Avoid making major changes to the patterns and architecture of how a feature works, after it has shown to work well, unless explicitly instructed
+- Always think about what other methods and areas of code might be affected by code changes.
+- Write a detailed documentation on every major feature you build and an overview.md file that indexes all of the docs. That way I can give you the overview and tell you to find and relevant documentation as needed.
