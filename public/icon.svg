@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Gradient definition -->
+    <defs>
+        <linearGradient id="ballGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#FFA726"/> <!-- Orange -->
+            <stop offset="100%" style="stop-color:#FF5252"/> <!-- Red -->
+        </linearGradient>
+    </defs>
+    
+    <!-- Basketball circle -->
+    <circle cx="256" cy="256" r="240" fill="url(#ballGradient)"/>
+    
+    <!-- Basketball lines -->
+    <path d="M256 16 V496" stroke="black" stroke-width="8" stroke-opacity="0.3"/>
+    <path d="M16 256 H496" stroke="black" stroke-width="8" stroke-opacity="0.3"/>
+    <path d="M76 76 Q256 256 436 436" stroke="black" stroke-width="8" stroke-opacity="0.3"/>
+    <path d="M436 76 Q256 256 76 436" stroke="black" stroke-width="8" stroke-opacity="0.3"/>
+</svg>
