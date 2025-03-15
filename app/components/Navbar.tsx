@@ -29,7 +29,7 @@ export default function Navbar() {
                 height={32} 
                 className="transform group-hover:rotate-180 transition-all duration-500 hover:scale-110" 
               />
-              <span className="text-white font-bold text-xl group-hover:text-white/90 transition-colors">Blog</span>
+              <span className="text-white font-bold text-xl group-hover:text-white/90 transition-colors">Hoops & Stories</span>
             </Link>
           </div>
 

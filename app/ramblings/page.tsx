@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import BlogPostCard from '@/components/BlogPostCard';
+import BlogPostCard from '@/app/components/BlogPostCard';
 import { BlogPost } from '@/types/blog';
 
 // Sample posts for layout (these will come from your database later)
@@ -11,7 +11,7 @@ const samplePosts: BlogPost[] = [
     date: 'March 14, 2025',
     readingTime: '5 min read',
     slug: 'evolution-of-point-guards',
-    coverImage: '/images/basketball-court.jpg',
+    coverImage: '/images/pointguard.webp',
     tags: ['NBA', 'Analysis', 'History']
   },
   {
@@ -21,6 +21,7 @@ const samplePosts: BlogPost[] = [
     date: 'March 12, 2025',
     readingTime: '8 min read',
     slug: 'pistons-2004-defense',
+    coverImage: '/images/pistons.jpeg',
     tags: ['NBA', 'Defense', 'Analysis']
   },
   {
@@ -30,16 +31,16 @@ const samplePosts: BlogPost[] = [
     date: 'March 10, 2025',
     readingTime: '6 min read',
     slug: 'kings-beautiful-game',
-    coverImage: '/images/kings-game.jpg',
+    coverImage: '/images/2000kings.jpg',
     tags: ['NBA', 'Offense', 'History']
   }
 ];
 
 export default function RamblingsPage() {
   return (
-    <main className="min-h-screen pt-16 relative">
+    <main className="min-h-screen relative pt-16">
       {/* Full-screen background image */}
-      <div className="fixed inset-0 z-0">
+      <div className="absolute inset-0">
         <Image
           src="/images/court2.avif"
           alt="Basketball Court"
